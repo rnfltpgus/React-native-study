@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { useEffect, useState } from "react";
+import { View, StyleSheet, Alert } from "react-native";
 
+import Card from "../components/ui/Card";
+import InstructionText from "../components/ui/InstructionText";
 import Title from "../components/ui/Title";
 import NumberContainer from "../components/game/NumberContainer";
 import PrimaryButton from "../components/ui/PrimaryButton";
@@ -18,9 +20,15 @@ function generateRandomBetween(min, max, exclude) {
 let minBoundary = 1;
 let maxBoundary = 100;
 
-function GameScreen({ userNumber }) {
+function GameScreen({ userNumber, onGameOver }) {
   const initialGuess = generateRandomBetween(1, 100, userNumber);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
+
+  useEffect(() => {
+    if (currentGuess === userNumber) {
+      onGameOver();
+    }
+  }, [currentGuess, userNumber, onGameOver]);
 
   function nextGuessHandler(direction) {
     if (
@@ -37,21 +45,22 @@ function GameScreen({ userNumber }) {
       maxBoundary = currentGuess;
     } else {
       minBoundary = currentGuess + 1;
-      const newRndNumber = generateRandomBetween(
-        minBoundary,
-        maxBoundary,
-        currentGuess
-      );
-      setCurrentGuess(newRndNumber);
     }
+    const newRndNumber = generateRandomBetween(
+      minBoundary,
+      maxBoundary,
+      currentGuess
+    );
+
+    setCurrentGuess(newRndNumber);
   }
 
   return (
     <View style={styles.screen}>
       <Title>Opponent's Guess</Title>
       <NumberContainer>{currentGuess}</NumberContainer>
-      <View>
-        <Text>Higher or lower?</Text>
+      <Card>
+        <InstructionText>Higher or lower?</InstructionText>
         <View>
           <PrimaryButton onPress={nextGuessHandler.bind(this, "lower")}>
             -
@@ -60,7 +69,7 @@ function GameScreen({ userNumber }) {
             +
           </PrimaryButton>
         </View>
-      </View>
+      </Card>
     </View>
   );
 }
